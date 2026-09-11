@@ -2,6 +2,23 @@
 
 This package accompanies the manuscript **Invariant-Preserving Compression of Structured Tool Outputs for LLM Agents** by Pramod Ubbala.
 
+The manuscript PDF is available at [`Invariant_Preserving_Tool_Output_Compression.pdf`](Invariant_Preserving_Tool_Output_Compression.pdf). The code and reported result files are released under the MIT License.
+
+## Paper evidence map
+
+Run `python make_paper_claims.py` to regenerate `results/paper_claims.csv`. That file maps the manuscript's reported measurements to the committed source data and records each derivation.
+
+| Manuscript item | Produced by | Evidence |
+| --- | --- | --- |
+| Table 3, primary benchmark | `python invariant_compression_benchmark.py --output-dir reproduced_results` | `results/summary.csv`, `results/results.csv` |
+| Figure 1, reduction versus preservation | `python make_ipc_figures.py` | `results/summary.csv` |
+| Figure 2, preservation by task | `python make_ipc_figures.py` | `results/task_breakdown.csv` |
+| Figure 3, gate reduction and recovery | `python make_ipc_figures.py` | `results/task_breakdown.csv` |
+| Fault-injection results | `python invariant_compression_benchmark.py --output-dir reproduced_results` | `results/corruption_tests.csv` |
+| Table 4, public issue validation | `python external_validation/real_issue_snapshot_benchmark.py` | `external_validation/results/real_issue_summary.csv`, `external_validation/results/real_issue_results.csv` |
+| Table 5, sensitivity sweep | `python robustness/sensitivity_and_uncertainty.py --output-dir robustness/reproduced_results` | `robustness/sensitivity_summary.csv`, `robustness/sensitivity_raw.csv` |
+| Bootstrap and Wilson intervals | `python robustness/sensitivity_and_uncertainty.py --output-dir robustness/reproduced_results` | `robustness/primary_uncertainty.csv`, `robustness/public_uncertainty.csv` |
+
 ## Reported experiments
 
 ### 1. Seeded structured-tool benchmark
