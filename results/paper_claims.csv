@@ -1,0 +1,56 @@
+claim_id,paper_value,unit,claim,source_file,derivation
+C01,960,cases,Seeded benchmark cases,results/results.csv,count distinct case
+C02,6,domains,Seeded workload domains,results/results.csv,count distinct domain
+C03,8,task families,Seeded benchmark task families,results/results.csv,count distinct task
+C04,50,records,Minimum seeded payload size,results/results.csv,minimum n_rows
+C05,500,records,Maximum seeded payload size,results/results.csv,maximum n_rows
+C06,6720,method-case observations,Rows in the primary result table,results/results.csv,count data rows
+C07,89.84,%,Fixed projection mean reduction,results/summary.csv,mean_reduction_pct
+C08,37.50,%,Fixed projection answer preservation,results/summary.csv,answer_preservation_pct
+C09,82.13,%,Head-tail sampling mean reduction,results/summary.csv,mean_reduction_pct
+C10,0.52,%,Head-tail sampling answer preservation,results/summary.csv,answer_preservation_pct
+C11,75.99,%,Anomaly sampling mean reduction,results/summary.csv,mean_reduction_pct
+C12,40.83,%,Anomaly sampling answer preservation,results/summary.csv,answer_preservation_pct
+C13,99.76,%,Task-aware unverified mean reduction,results/summary.csv,mean_reduction_pct
+C14,78.54,%,Task-aware unverified answer preservation,results/summary.csv,answer_preservation_pct
+C15,70.51,%,Pattern-retention guard mean reduction,results/summary.csv,mean_reduction_pct
+C16,100.00,%,Pattern-retention guard answer preservation,results/summary.csv,answer_preservation_pct
+C17,90.23,%,Invariant-preserving gate mean reduction,results/summary.csv,mean_reduction_pct
+C18,100.00,%,Invariant-preserving gate answer preservation,results/summary.csv,answer_preservation_pct
+C19,72.71,%,Pattern-retention recovery rate,results/summary.csv,recovery_pct
+C20,9.53,percentage points,Reduction surrendered by the gate relative to the task-aware reducer,results/summary.csv,task-aware mean_reduction_pct minus gate mean_reduction_pct
+C21,19.72,percentage points,Gate reduction advantage over the pattern-retention guard,results/summary.csv,gate mean_reduction_pct minus pattern mean_reduction_pct
+C22,21.46,%,Task-aware reducer answer-change rate,results/summary.csv,100 minus answer_preservation_pct
+C23,85.00,%,Gate recovery rate for lookup tasks,results/task_breakdown.csv,recovery_pct for gate and lookup
+C24,96.67,%,Gate recovery rate for negative-evidence tasks,results/task_breakdown.csv,recovery_pct for gate and negative_evidence
+C25,900,corruptions,Injected contract-relevant corruptions,results/corruption_tests.csv,count data rows
+C26,900,detected,Detected contract-relevant corruptions,results/corruption_tests.csv,sum detected
+C27,167.17,microseconds,Fixed projection median latency,results/summary.csv,median_latency_us
+C28,164.59,microseconds,Anomaly sampling median latency,results/summary.csv,median_latency_us
+C29,168.21,microseconds,Pattern-retention guard median latency,results/summary.csv,median_latency_us
+C30,163.51,microseconds,Invariant-preserving gate median latency,results/summary.csv,median_latency_us
+C31,24,records,Public issue-snapshot records,external_validation/real_issue_snapshot.json,count records
+C32,19,records,Open records in public snapshot,external_validation/real_issue_snapshot.json,count state/status=open
+C33,5,records,Closed records in public snapshot,external_validation/real_issue_snapshot.json,count state/status=closed
+C34,8,tasks,Public issue-snapshot tasks,external_validation/results/real_issue_summary.csv,n
+C35,81.47,%,Public-data Invariant-preserving gate mean reduction,external_validation/results/real_issue_summary.csv,mean_reduction_pct
+C36,100.00,%,Public-data Invariant-preserving gate answer preservation,external_validation/results/real_issue_summary.csv,answer_preservation_pct
+C37,26.42,%,Public-data Pattern-retention guard mean reduction,external_validation/results/real_issue_summary.csv,mean_reduction_pct
+C38,87.50,%,Public-data Pattern-retention guard answer preservation,external_validation/results/real_issue_summary.csv,answer_preservation_pct
+C39,88.66,%,Public-data Task-aware unverified mean reduction,external_validation/results/real_issue_summary.csv,mean_reduction_pct
+C40,62.50,%,Public-data Task-aware unverified answer preservation,external_validation/results/real_issue_summary.csv,answer_preservation_pct
+C41,87.50,%,Public-data gate recovery rate,external_validation/results/real_issue_summary.csv,recovery_pct
+C42,9,configurations,Sensitivity configurations,robustness/sensitivity_summary.csv,count data rows
+C43,84.83,%,Minimum gate reduction in sensitivity sweep,robustness/sensitivity_summary.csv,minimum mean_reduction_pct
+C44,92.21,%,Maximum gate reduction in sensitivity sweep,robustness/sensitivity_summary.csv,maximum mean_reduction_pct
+C45,59.17,%,Minimum recovery rate in sensitivity sweep,robustness/sensitivity_summary.csv,minimum recovery_pct
+C46,60.42,%,Maximum recovery rate in sensitivity sweep,robustness/sensitivity_summary.csv,maximum recovery_pct
+C47,1000,resamples,Bootstrap resamples for primary interval,robustness/sensitivity_and_uncertainty.py,BOOTSTRAP_RESAMPLES
+C48,89.42,%,Gate mean-reduction bootstrap lower bound,robustness/primary_uncertainty.csv,bootstrap95_low
+C49,91.00,%,Gate mean-reduction bootstrap upper bound,robustness/primary_uncertainty.csv,bootstrap95_high
+C50,99.60,%,Gate answer-preservation Wilson lower bound,robustness/primary_uncertainty.csv,answer_wilson95_low
+C51,100.00,%,Gate answer-preservation Wilson upper bound,robustness/primary_uncertainty.csv,answer_wilson95_high
+C52,75.83,%,Task-aware answer-preservation Wilson lower bound,robustness/primary_uncertainty.csv,answer_wilson95_low
+C53,81.02,%,Task-aware answer-preservation Wilson upper bound,robustness/primary_uncertainty.csv,answer_wilson95_high
+C54,67.56,%,Public-data gate Wilson lower bound,robustness/public_uncertainty.csv,answer_wilson95_low
+C55,100.00,%,Public-data gate Wilson upper bound,robustness/public_uncertainty.csv,answer_wilson95_high
