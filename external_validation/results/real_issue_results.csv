@@ -1,0 +1,57 @@
+task,method,bytes,reduction_pct,answer_preserved,invariants_preserved,recovered,latency_us
+lookup,Raw,6989,0,1,1,0,0
+lookup,Fixed projection,4199,39.919874087852335,0,0,0,10.495
+lookup,Head-tail sampling,2367,66.13249391901559,0,0,0,0.36
+lookup,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.253
+lookup,Task-aware unverified,321,95.4070682501073,1,1,0,2.744
+lookup,Pattern-retention guard,4025,42.40950064386894,1,1,1,5.938
+lookup,Invariant-preserving gate,311,95.55015023608527,1,1,1,9.174
+rare_closed,Raw,6989,0,1,1,0,0
+rare_closed,Fixed projection,4199,39.919874087852335,1,1,0,10.456
+rare_closed,Head-tail sampling,2367,66.13249391901559,0,0,0,0.401
+rare_closed,Issue-triage sampler,3750,46.34425525826299,1,1,0,2.253
+rare_closed,Task-aware unverified,854,87.78079839748176,1,1,0,6.129
+rare_closed,Pattern-retention guard,3746,46.40148805265417,1,1,0,6.069
+rare_closed,Invariant-preserving gate,3744,46.430104449849765,1,1,0,8.223
+latest_actor,Raw,6989,0,1,1,0,0
+latest_actor,Fixed projection,4199,39.919874087852335,1,1,0,8.592
+latest_actor,Head-tail sampling,2367,66.13249391901559,0,0,0,0.401
+latest_actor,Issue-triage sampler,3750,46.34425525826299,1,0,0,2.284
+latest_actor,Task-aware unverified,246,96.48018314494206,0,0,0,2.173
+latest_actor,Pattern-retention guard,4323,38.14565746172557,1,1,1,6.15
+latest_actor,Invariant-preserving gate,468,93.30376305623122,1,1,1,10.315
+aggregation,Raw,6989,0,1,1,0,0
+aggregation,Fixed projection,4199,39.919874087852335,1,1,0,8.603
+aggregation,Head-tail sampling,2367,66.13249391901559,0,0,0,0.351
+aggregation,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.274
+aggregation,Task-aware unverified,94,98.65502933180711,0,0,0,0.301
+aggregation,Pattern-retention guard,6991,-0.02861639719560216,1,1,1,7.061
+aggregation,Invariant-preserving gate,525,92.48819573615683,1,1,1,24.347
+join_actor,Raw,6989,0,1,1,0,0
+join_actor,Fixed projection,4199,39.919874087852335,1,1,0,8.613
+join_actor,Head-tail sampling,2367,66.13249391901559,0,0,0,0.36
+join_actor,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.293
+join_actor,Task-aware unverified,402,94.24810416368578,1,1,0,3.095
+join_actor,Pattern-retention guard,4325,38.11704106452998,1,1,1,5.949
+join_actor,Invariant-preserving gate,392,94.39118614966375,1,1,1,9.985
+negative_evidence,Raw,6989,0,1,1,0,0
+negative_evidence,Fixed projection,4199,39.919874087852335,1,1,0,8.573
+negative_evidence,Head-tail sampling,2367,66.13249391901559,0,0,0,0.35
+negative_evidence,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.263
+negative_evidence,Task-aware unverified,94,98.65502933180711,0,0,0,0.311
+negative_evidence,Pattern-retention guard,3746,46.40148805265417,0,0,0,5.808
+negative_evidence,Invariant-preserving gate,611,91.25769065674632,1,1,1,22.905
+threshold,Raw,6989,0,1,1,0,0
+threshold,Fixed projection,4199,39.919874087852335,0,0,0,8.603
+threshold,Head-tail sampling,2367,66.13249391901559,0,0,0,0.361
+threshold,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.263
+threshold,Task-aware unverified,1906,72.7285734725998,1,1,0,13.009
+threshold,Pattern-retention guard,6991,-0.02861639719560216,1,1,1,7.05
+threshold,Invariant-preserving gate,1896,72.87165545857776,1,1,1,30.896
+provenance,Raw,6989,0,1,1,0,0
+provenance,Fixed projection,4199,39.919874087852335,0,0,0,8.543
+provenance,Head-tail sampling,2367,66.13249391901559,0,0,0,0.351
+provenance,Issue-triage sampler,3750,46.34425525826299,0,0,0,2.263
+provenance,Task-aware unverified,2423,65.331234797539,1,1,0,19.219
+provenance,Pattern-retention guard,6991,-0.02861639719560216,1,1,1,7.671
+provenance,Invariant-preserving gate,2413,65.47431678351697,1,1,1,41.092
