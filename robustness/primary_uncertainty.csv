@@ -1,0 +1,8 @@
+method,n,mean_reduction_pct,bootstrap95_low,bootstrap95_high,answer_preservation_pct,answer_wilson95_low,answer_wilson95_high
+Anomaly sampling,960,75.99,75.55,76.46,40.83,37.77,43.97
+Fixed projection,960,89.84,89.84,89.84,37.5,34.49,40.61
+Head-tail sampling,960,82.13,81.29,83.04,0.52,0.22,1.21
+Invariant-preserving gate,960,90.23,89.42,91.0,100.0,99.6,100
+Pattern-retention guard,960,70.51,69.89,71.13,100.0,99.6,100
+Raw,960,0.0,0.0,0.0,100.0,99.6,100
+Task-aware unverified,960,99.76,99.75,99.77,78.54,75.83,81.02

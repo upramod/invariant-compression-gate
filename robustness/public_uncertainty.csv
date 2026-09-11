@@ -1,0 +1,8 @@
+method,n,mean_reduction_pct,answer_preservation_pct,answer_wilson95_low,answer_wilson95_high
+Fixed projection,8,39.92,62.5,30.57,86.32
+Head-tail sampling,8,66.13,0.0,0,32.44
+Invariant-preserving gate,8,81.47,100.0,67.56,100
+Issue-triage sampler,8,46.34,25.0,7.15,59.07
+Pattern-retention guard,8,26.42,87.5,52.91,97.76
+Raw,8,0.0,100.0,67.56,100
+Task-aware unverified,8,88.66,62.5,30.57,86.32
