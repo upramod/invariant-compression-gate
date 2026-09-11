@@ -1,0 +1,8 @@
+method,n,mean_reduction_pct,answer_preservation_pct,invariant_preservation_pct,recovery_pct,median_latency_us
+Raw,8,0.0,100.0,100.0,0.0,0.0
+Fixed projection,8,39.92,62.5,62.5,0.0,8.6
+Head-tail sampling,8,66.13,0.0,0.0,0.0,0.36
+Issue-triage sampler,8,46.34,25.0,12.5,0.0,2.26
+Task-aware unverified,8,88.66,62.5,62.5,0.0,2.92
+Pattern-retention guard,8,26.42,87.5,87.5,75.0,6.11
+Invariant-preserving gate,8,81.47,100.0,100.0,87.5,16.61
