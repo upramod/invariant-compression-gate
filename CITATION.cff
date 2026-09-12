@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "Invariant-Preserving Compression of Structured Tool Outputs for LLM Agents"
+message: "If you use this software or the accompanying results, please cite the repository and manuscript."
+type: software
+authors:
+  - family-names: Ubbala
+    given-names: Pramod
+    orcid: "https://orcid.org/0009-0005-5816-2998"
+repository-code: "https://github.com/upramod/invariant-compression-gate"
+license: MIT
+date-released: 2026-09-12
+keywords:
+  - large language model agents
+  - tool outputs
+  - context compression
+  - invariant preservation
+  - reproducible systems research
