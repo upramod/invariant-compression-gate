@@ -5,6 +5,7 @@ on:
     branches: [research/headroom-comparison-20260919, main]
     paths:
       - 'experiments/headroom_compare/**/*.py'
+      - 'experiments/headroom_compare/**/*.patch'
       - 'invariant_compression_benchmark.py'
       - 'external_validation/headroom_external_eval.py'
       - 'external_validation/real_issue_snapshot.json'
@@ -73,6 +74,16 @@ jobs:
         run: |
           mkdir -p 'experiments/headroom_compare/runs/${{ matrix.runtime }}/nullable-repro'
           python experiments/headroom_compare/nullable_repro.py --output 'experiments/headroom_compare/runs/${{ matrix.runtime }}/nullable-repro'
+      - name: Validate proposed upstream nullable fix
+        if: matrix.runtime == 'source-bc21c93'
+        timeout-minutes: 20
+        run: |
+          git clone --filter=blob:none https://github.com/headroomlabs-ai/headroom.git /tmp/headroom-fix
+          cd /tmp/headroom-fix
+          git checkout bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9
+          git apply "$GITHUB_WORKSPACE/experiments/headroom_compare/upstream_null_empty_fix.patch"
+          cargo test -p headroom-core csv_formatter_distinguishes_missing_null_empty_and_literal_null
+          cargo test -p headroom-core csv_formatter_nullable_swap_is_not_identical
       - name: Preserve environment and source
         if: always()
         run: |
