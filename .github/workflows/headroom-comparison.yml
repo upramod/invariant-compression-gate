@@ -1,0 +1,74 @@
+name: Headroom comparison
+
+on:
+  push:
+    branches: [research/headroom-comparison-20260919]
+    paths:
+      - 'experiments/headroom_compare/**'
+      - '.github/workflows/headroom-comparison.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: headroom-comparison-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['0.36.0', '0.37.0']
+    env:
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      LITELLM_LOCAL_MODEL_COST_MAP: 'True'
+      HEADROOM_UPDATE_CHECK: 'off'
+      DO_NOT_TRACK: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install unchanged published runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --only-binary=:all: 'headroom-ai==${{ matrix.version }}' tiktoken
+          python -m pip freeze
+      - name: Inspect native API before comparison
+        run: |
+          python - <<'PY'
+          import importlib.metadata as md, inspect, json
+          from headroom.transforms.smart_crusher import SmartCrusher, SmartCrusherConfig
+          print('HEADROOM_VERSION', md.version('headroom-ai'))
+          print('CONSTRUCTOR', inspect.signature(SmartCrusher))
+          print('CONFIG', inspect.signature(SmartCrusherConfig))
+          print('APPLY_SOURCE', inspect.getsource(SmartCrusher.apply))
+          rows = [{'record_id': f'e{i:03}', 'entity_id': 'alice', 'timestamp': 1000+i,
+                   'state': 'ACTIVE' if i % 4 else 'DISABLED', 'cost_usd': i / 100,
+                   'details': 'routine account synchronization metadata ' * 5} for i in range(120)]
+          raw = json.dumps(rows, separators=(',', ':'))
+          for mode, cfg in [('default', SmartCrusherConfig()),
+                            ('lossless', SmartCrusherConfig(lossless_only=True)),
+                            ('audit_safe', SmartCrusherConfig(audit_safe=True, protected_patterns=['DISABLED']))]:
+              c = SmartCrusher(config=cfg)
+              r = c.crush_array_json(raw, query='latest state of alice')
+              print('RESULT', mode, json.dumps(r, default=str)[:16000])
+              print('CRUSH', mode, c.crush(raw, query='latest state of alice').compressed[:8000])
+          PY
+      - name: Run tested comparison when available
+        run: |
+          if test -f experiments/headroom_compare/compare.py; then
+            python -m unittest discover -s experiments/headroom_compare -p 'test_*.py' -v
+            python experiments/headroom_compare/compare.py --runtime '${{ matrix.version }}' --output 'experiments/headroom_compare/runs/${{ matrix.version }}'
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: headroom-comparison-${{ matrix.version }}
+          path: experiments/headroom_compare/runs/
+          if-no-files-found: ignore
