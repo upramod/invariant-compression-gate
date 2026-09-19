@@ -1,0 +1,46 @@
+name: Upstream nullable patch validation
+
+on:
+  push:
+    branches: [research/headroom-comparison-20260919]
+    paths:
+      - 'experiments/headroom_compare/apply_upstream_null_empty_fix.py'
+      - '.github/workflows/upstream-patch-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Checkout pinned upstream source
+        run: |
+          git clone --filter=blob:none https://github.com/headroomlabs-ai/headroom.git /tmp/headroom-fix
+          cd /tmp/headroom-fix
+          git checkout bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9
+      - name: Apply proposed fix mechanically
+        run: |
+          cd /tmp/headroom-fix
+          python "$GITHUB_WORKSPACE/experiments/headroom_compare/apply_upstream_null_empty_fix.py"             crates/headroom-core/src/transforms/smart_crusher/compaction/formatter.rs
+          git diff --check
+          git diff > "$GITHUB_WORKSPACE/upstream_null_empty_fix.patch"
+      - name: Run focused Rust regressions
+        working-directory: /tmp/headroom-fix
+        run: |
+          cargo test -p headroom-core csv_formatter_distinguishes_missing_null_empty_and_literal_null
+          cargo test -p headroom-core csv_formatter_nullable_swap_is_not_identical
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: upstream-null-empty-fix
+          path: upstream_null_empty_fix.patch
+          if-no-files-found: error
+          retention-days: 90
