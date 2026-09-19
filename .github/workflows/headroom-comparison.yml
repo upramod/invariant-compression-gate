@@ -76,3 +76,65 @@ jobs:
           path: experiments/headroom_compare/runs/${{ matrix.runtime }}/
           if-no-files-found: error
           retention-days: 90
+
+  full-960-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - name: Run full original-case baseline follow-up
+        run: |
+          mkdir -p experiments/headroom_compare/runs/full-960
+          python experiments/headroom_compare/full_960_baseline.py --output experiments/headroom_compare/runs/full-960
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: full-960-baseline
+          path: experiments/headroom_compare/runs/full-960/
+          retention-days: 90
+
+  nullable-repro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: ['0.36.0', '0.37.0', 'source-bc21c93']
+    env:
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      LITELLM_LOCAL_MODEL_COST_MAP: 'True'
+      HEADROOM_UPDATE_CHECK: 'off'
+      DO_NOT_TRACK: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - name: Install released runtime
+        if: ${{ !startsWith(matrix.runtime, 'source-') }}
+        run: python -m pip install --only-binary=:all: 'headroom-ai==${{ matrix.runtime }}'
+      - name: Install pinned source runtime
+        if: startsWith(matrix.runtime, 'source-')
+        run: |
+          rustup update stable --no-self-update
+          rustup default stable
+          python -m pip install 'headroom-ai @ git+https://github.com/headroomlabs-ai/headroom.git@bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9'
+      - name: Run empty-string vs null strict-lossless repro
+        run: |
+          mkdir -p 'experiments/headroom_compare/runs/nullable-${{ matrix.runtime }}'
+          python experiments/headroom_compare/nullable_repro.py --output 'experiments/headroom_compare/runs/nullable-${{ matrix.runtime }}'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: nullable-repro-${{ matrix.runtime }}
+          path: experiments/headroom_compare/runs/nullable-${{ matrix.runtime }}/
+          if-no-files-found: error
+          retention-days: 90
