@@ -2,9 +2,12 @@ name: Headroom comparison
 
 on:
   push:
-    branches: [research/headroom-comparison-20260919]
+    branches: [research/headroom-comparison-20260919, main]
     paths:
-      - 'experiments/headroom_compare/**'
+      - 'experiments/headroom_compare/**/*.py'
+      - 'invariant_compression_benchmark.py'
+      - 'external_validation/headroom_external_eval.py'
+      - 'external_validation/real_issue_snapshot.json'
       - '.github/workflows/headroom-comparison.yml'
   workflow_dispatch:
 
@@ -59,11 +62,13 @@ jobs:
         run: |
           set -o pipefail
           python experiments/headroom_compare/compare.py --runtime '${{ matrix.runtime }}' --output 'experiments/headroom_compare/runs/${{ matrix.runtime }}' 2>&1 | tee 'experiments/headroom_compare/runs/${{ matrix.runtime }}/execution.log'
+      - name: Audit saved native evidence
+        run: python experiments/headroom_compare/audit_artifacts.py 'experiments/headroom_compare/runs/${{ matrix.runtime }}'
       - name: Preserve environment and source
         if: always()
         run: |
           python -m pip freeze > 'experiments/headroom_compare/runs/${{ matrix.runtime }}/environment-final.txt'
-          cp experiments/headroom_compare/*.py experiments/headroom_compare/README.md 'experiments/headroom_compare/runs/${{ matrix.runtime }}/'
+          cp experiments/headroom_compare/*.py experiments/headroom_compare/*.md 'experiments/headroom_compare/runs/${{ matrix.runtime }}/'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
