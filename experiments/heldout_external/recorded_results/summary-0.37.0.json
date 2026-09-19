@@ -1,0 +1,67 @@
+[
+  {
+    "method": "contract_projection",
+    "cases": 24,
+    "contract_preserved": 24,
+    "contract_failures": 0,
+    "not_evaluable": 0,
+    "mean_future_utility": 0.0,
+    "mean_byte_reduction_pct": 33.004686805812774,
+    "mean_token_reduction_pct": 32.057492289239555,
+    "median_ms": 0.6090495,
+    "accepted": 0,
+    "fallback_original": 0
+  },
+  {
+    "method": "headroom_default",
+    "cases": 24,
+    "contract_preserved": 24,
+    "contract_failures": 0,
+    "not_evaluable": 0,
+    "mean_future_utility": 1.0,
+    "mean_byte_reduction_pct": 46.06869423441876,
+    "mean_token_reduction_pct": 31.866889463441144,
+    "median_ms": 37.737715,
+    "accepted": 0,
+    "fallback_original": 0
+  },
+  {
+    "method": "headroom_default_plus_verifier",
+    "cases": 24,
+    "contract_preserved": 24,
+    "contract_failures": 0,
+    "not_evaluable": 0,
+    "mean_future_utility": 1.0,
+    "mean_byte_reduction_pct": 46.06869423441876,
+    "mean_token_reduction_pct": 31.866889463441144,
+    "median_ms": 39.327531500000006,
+    "accepted": 24,
+    "fallback_original": 0
+  },
+  {
+    "method": "headroom_lossless",
+    "cases": 24,
+    "contract_preserved": 24,
+    "contract_failures": 0,
+    "not_evaluable": 0,
+    "mean_future_utility": 1.0,
+    "mean_byte_reduction_pct": 46.06869423441876,
+    "mean_token_reduction_pct": 31.866889463441144,
+    "median_ms": 37.923841499999995,
+    "accepted": 0,
+    "fallback_original": 0
+  },
+  {
+    "method": "raw",
+    "cases": 24,
+    "contract_preserved": 24,
+    "contract_failures": 0,
+    "not_evaluable": 0,
+    "mean_future_utility": 1.0,
+    "mean_byte_reduction_pct": 0.0,
+    "mean_token_reduction_pct": 0.0,
+    "median_ms": 0.0,
+    "accepted": 0,
+    "fallback_original": 0
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "workflow_run": 35466105837,
+  "experiment_commit": "a9bca195f8871df71229e9091fc3cd1d23193373",
+  "artifacts": [
+    {
+      "name": "heldout-external-0.37.0",
+      "artifact_id": 10590928903,
+      "digest": "sha256:2971ca759e1d3f06b7db3bdc309d2ac979819023c9704d353f3390b9014437c2"
+    },
+    {
+      "name": "heldout-external-source-67eb910",
+      "artifact_id": 10590474636,
+      "digest": "sha256:1c3c46e1461f358fa4b3b3f297c95ad1536a8124a401b626f1f0f83349df8207"
+    }
+  ]
+}
