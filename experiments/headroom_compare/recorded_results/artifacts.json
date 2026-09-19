@@ -1,0 +1,54 @@
+{
+  "workflow_run": 35427044960,
+  "benchmark_commit": "7b6239892b59f117c498b5bf8674152a46b9d777",
+  "paper_base": "95521a1d69877d10a7cb8e7da57def0aa2c0f45e",
+  "source_pin": "bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9",
+  "python": "3.13.15",
+  "tiktoken": "0.14.0",
+  "encoding": "cl100k_base",
+  "task_cases_per_runtime": 168,
+  "distinct_payloads": 21,
+  "observations_per_runtime": 1344,
+  "input_sequence_sha256": "082705fa1c11a5029c3a5675dabe06587bd0695903fa5361af525ad4ec0de06a",
+  "non_timing_output_records_identical_across_runtimes": true,
+  "retrieval_proof_scope": "13 same-process immediate target-details checks per runtime; not an agent retrieval evaluation",
+  "artifacts": [
+    {
+      "runtime": "0.36.0",
+      "headroom_version": "0.36.0",
+      "artifact_id": 10579850213,
+      "artifact_url": "https://github.com/upramod/invariant-compression-gate/actions/runs/35427044960/artifacts/10579850213",
+      "zip_sha256": "c42cf158cd92f0f178af09da16a847898947bb0bf56012934fa026298443d843",
+      "expires_at": "2026-12-18",
+      "native_binary_sha256": "c64d2095c49961d3d2341a27ca771466c4233956a30a62ad1d0c7225fd2d5b9c",
+      "smart_crusher_sha256": "d75a03bc9bfec33f8f7aec2e2190bc9b4af4bc9f85021373f209a8cf0774b529",
+      "exact_retrievals_for_inline_mismatches": 13
+    },
+    {
+      "runtime": "0.37.0",
+      "headroom_version": "0.37.0",
+      "artifact_id": 10579307167,
+      "artifact_url": "https://github.com/upramod/invariant-compression-gate/actions/runs/35427044960/artifacts/10579307167",
+      "zip_sha256": "1c2dc179c23b872767d6d4db718b566efbfdce9ae5cc7561668479a3fb1103c6",
+      "expires_at": "2026-12-18",
+      "native_binary_sha256": "c077a0764f1d2c95e7375572bb52066b47ad9e62b53fbc8257a253552d3cdff3",
+      "smart_crusher_sha256": "650498170ca09ef560b975aab91d71beda7b762b108405339416160b3ff63e17",
+      "exact_retrievals_for_inline_mismatches": 13
+    },
+    {
+      "runtime": "source-bc21c93",
+      "headroom_version": "0.37.0",
+      "artifact_id": 10579417359,
+      "artifact_url": "https://github.com/upramod/invariant-compression-gate/actions/runs/35427044960/artifacts/10579417359",
+      "zip_sha256": "87bae5d0b68faa4f2d189a633274d0df8cb8fb9525f37f8e1342806b2cdf3e67",
+      "expires_at": "2026-12-18",
+      "native_binary_sha256": "7e5036cc1c5f2840acaf794e08b14c0a23b038221ef10d8e5691f430ecee7df6",
+      "smart_crusher_sha256": "650498170ca09ef560b975aab91d71beda7b762b108405339416160b3ff63e17",
+      "exact_retrievals_for_inline_mismatches": 13,
+      "direct_url": {
+        "url": "https://github.com/headroomlabs-ai/headroom.git",
+        "vcs_info": {"commit_id":"bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9","requested_revision":"bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9","vcs":"git"}
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "method": "Correct task-aware projection",
+    "cases": 960,
+    "mean_byte_reduction_pct": 99.70778353183272,
+    "answer_preservation_pct": 100.0,
+    "invariant_preservation_pct": 100.0,
+    "recovery_pct": 0.0,
+    "median_latency_us": 16.9065
+  },
+  {
+    "method": "Projection plus verification",
+    "cases": 960,
+    "mean_byte_reduction_pct": 99.70778353183272,
+    "answer_preservation_pct": 100.0,
+    "invariant_preservation_pct": 100.0,
+    "recovery_pct": 0.0,
+    "median_latency_us": 37.906499999999994
+  },
+  {
+    "method": "Original invariant-preserving gate",
+    "cases": 960,
+    "mean_byte_reduction_pct": 90.23003467717326,
+    "answer_preservation_pct": 100.0,
+    "invariant_preservation_pct": 100.0,
+    "recovery_pct": 60.20833333333333,
+    "median_latency_us": 277.10450000000003
+  }
+]
