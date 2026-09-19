@@ -2,9 +2,18 @@
 
 ## Status
 
-Confirmed with unchanged published Headroom 0.36.0 and 0.37.0 on September 19, 2026. The current source formatter at commit `bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9` contains the same rendering paths.
+Confirmed on September 19, 2026 with unchanged Headroom 0.36.0, 0.37.0, and current upstream `main` at `bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9`.
 
-An attempt to create the upstream issue through the connected GitHub integration returned HTTP 403 (`Resource not accessible by integration`). This file preserves the exact finding so it can be submitted manually or used for a fork/PR.
+The repository's own IR models `CellValue::Missing` as distinct from `Scalar(Value::Null)`, and strict-lossless mode is documented in source as marker-free and byte-recoverable / data-lossless for structured data. The CSV-schema formatter currently collapses distinctions that the IR retains.
+
+A focused proposed fix was validated against the pinned/current upstream source in GitHub Actions run **35455082632**. The generated patch applied cleanly, `git diff --check` passed, and both added Rust regression tests passed:
+
+- `csv_formatter_distinguishes_missing_null_empty_and_literal_null`
+- `csv_formatter_nullable_swap_is_not_identical`
+
+The exact tested patch is committed as `upstream_null_empty_fix.patch`.
+
+The connected GitHub integration cannot create issues in `headroomlabs-ai/headroom`; the REST create-issue call returned HTTP 403 (`Resource not accessible by integration`). No upstream issue or PR is claimed to have been submitted.
 
 ## Minimal semantic collision
 
@@ -22,7 +31,7 @@ Create a second table with those two values swapped:
 {"id":18,"label":""}
 ```
 
-Keep all other rows byte-identical. With enough repetitive rows for the lossless table path to win:
+Keep all other rows byte-identical. With enough repetitive rows for the strict-lossless table path to win:
 
 ```python
 SmartCrusher(
@@ -33,7 +42,7 @@ SmartCrusher(
 ).crush(json_text, query="return id and label exactly")
 ```
 
-The two different input SHA-256 values produce identical compressed output:
+The two different input SHA-256 values produce byte-identical compressed output:
 
 ```text
 [40]{id:int,label:string?,payload:string}
@@ -42,11 +51,12 @@ The two different input SHA-256 values produce identical compressed output:
 18,,...
 ```
 
-Observed on 0.36.0 and 0.37.0:
+Observed on all tested paths:
 
 - both inputs were modified by `lossless:table`;
 - both rendered outputs were byte-identical;
-- the control table containing an empty string but no null used the non-nullable `label:string` schema.
+- swapping which row held null versus empty string did not change the output;
+- the control table containing an empty string but no null used non-nullable `label:string`.
 
 ## Source explanation
 
@@ -56,7 +66,7 @@ In `crates/headroom-core/src/transforms/smart_crusher/compaction/formatter.rs`:
 CellValue::Missing => String::new(),
 ```
 
-and later:
+and:
 
 ```rust
 Value::Null => String::new(),
@@ -69,9 +79,22 @@ Value::String(s) => {
 }
 ```
 
-For `Value::String("")`, `needs_csv_quote("")` is false, so it also renders as an empty cell. Once the column is nullable, the schema does not identify which individual empty cell came from null versus an empty string.
+For `Value::String("")`, `needs_csv_quote("")` is false, so Missing, null, and empty string all produce an empty field. The nullable schema only says that some row is absent/null; it cannot identify which individual empty field came from which original value.
 
-This likely also makes a missing cell indistinguishable from those values in the CSV-schema representation.
+## Tested candidate encoding
+
+The validated candidate patch keeps the existing compact format while making the four ambiguous raw representations distinct:
+
+| Original cell | Candidate rendering |
+|---|---|
+| Missing field | empty CSV field |
+| JSON null | `null` |
+| Empty string | `""` |
+| Literal string `"null"` | `"null"` |
+
+The patch changes null rendering and forces quoting for the two string values that would otherwise collide. It adds both a direct four-case formatter regression and a swapped-row regression.
+
+This demonstrates an injective raw representation for these cases. It does **not** claim that this is the only acceptable wire encoding, or that every generic CSV parser preserves quote-origin metadata. Maintainers may prefer another explicit null/missing encoding or may choose to decline CSV compaction for ambiguous tables. The regression contract is the important part: two distinct structured inputs must not collapse to identical strict-lossless output.
 
 ## Upstream issue text
 
@@ -79,6 +102,12 @@ This likely also makes a missing cell indistinguishable from those values in the
 
 Suggested body:
 
-> Two arrays that differ only by swapping `""` and `null` between two rows produce byte-identical output with `lossless_only=True`. Both cells render empty under the same `string?` schema, so the output cannot identify which row originally contained null. I reproduced this on 0.36.0 and 0.37.0. The formatter currently renders `Missing`, `Value::Null`, and `Value::String("")` as the same empty CSV cell. A regression test can place both values in one table, swap their row positions, and assert that the two lossless outputs remain distinguishable.
+> Two arrays that differ only by swapping `""` and `null` between two rows produce byte-identical output with `lossless_only=True`. Both cells render empty under the same `string?` schema, so the output cannot identify which row originally contained null.
+>
+> I reproduced this on 0.36.0, 0.37.0, and current `main` at `bc21c93`. The compaction IR explicitly keeps Missing distinct from Scalar(Null), while the CSV formatter currently renders Missing, Null, and String("") as empty cells.
+>
+> A minimal regression is to put both values in one table, swap their row positions, and assert that the two strict-lossless outputs remain distinguishable. I also tested one candidate encoding locally: Missing stays empty, Null renders as `null`, empty string as `""`, and literal string `"null"` is quoted. The focused formatter tests pass, but the exact wire representation should follow the maintainers' preferred contract.
 
-Before proposing a fix, check whether maintainers want null represented explicitly (for example as a reserved literal/typed encoding), empty strings quoted distinctly, or the formatter to decline CSV compaction for ambiguous nullable-string columns. The regression should define the contract first.
+## Separation from the research comparison
+
+This is an upstream representation bug found during validation. It is **not** evidence that the invariant gate is a better compressor, and it is not folded into the manuscript's comparison result. The same-case 960 benchmark separately showed that direct task-aware projection is the stronger fixed-task baseline.
