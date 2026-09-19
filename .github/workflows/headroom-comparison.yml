@@ -5,7 +5,6 @@ on:
     branches: [research/headroom-comparison-20260919, main]
     paths:
       - 'experiments/headroom_compare/**/*.py'
-      - 'experiments/headroom_compare/**/*.patch'
       - 'invariant_compression_benchmark.py'
       - 'external_validation/headroom_external_eval.py'
       - 'external_validation/real_issue_snapshot.json'
@@ -81,7 +80,9 @@ jobs:
           git clone --filter=blob:none https://github.com/headroomlabs-ai/headroom.git /tmp/headroom-fix
           cd /tmp/headroom-fix
           git checkout bc21c9370793f7e4aa94ac4c5d9a67a8d2dd0df9
-          git apply "$GITHUB_WORKSPACE/experiments/headroom_compare/upstream_null_empty_fix.patch"
+          python "$GITHUB_WORKSPACE/experiments/headroom_compare/apply_upstream_null_empty_fix.py"             crates/headroom-core/src/transforms/smart_crusher/compaction/formatter.rs
+          git diff --check
+          git diff > "$GITHUB_WORKSPACE/experiments/headroom_compare/runs/source-bc21c93/upstream_null_empty_fix.patch"
           cargo test -p headroom-core csv_formatter_distinguishes_missing_null_empty_and_literal_null
           cargo test -p headroom-core csv_formatter_nullable_swap_is_not_identical
       - name: Preserve environment and source
