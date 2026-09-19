@@ -28,7 +28,7 @@ import time
 from dataclasses import asdict
 from types import SimpleNamespace
 
-from engine import Candidate, Case, CCR, check, decode, dumps, gate, patterns_for, timed
+from engine import Candidate, Case, CCR, Unsupported, check, decode, dumps, gate, patterns_for, timed, value_patterns_for
 
 ROOT = Path(__file__).resolve().parents[2]
 PAPER_BASE = "95521a1d69877d10a7cb8e7da57def0aa2c0f45e"
@@ -142,9 +142,11 @@ def run_native(case, mode, tokenizer, repeats):
     config = SmartCrusherConfig()
     if mode == "lossless":
         config.lossless_only = True
-    elif mode == "audit_safe":
+    elif mode in ("audit_safe", "audit_values"):
         config.audit_safe = True
-        config.protected_patterns = case.patterns
+        config.protected_patterns = (case.patterns if mode == "audit_safe" else
+            value_patterns_for(case.task, json.loads(case.query)["parameters"],
+                               public=case.corpus == "public_snapshot"))
         config.fail_closed_on_protected_loss = True
     start = time.perf_counter_ns()
     crusher = SmartCrusher(config=config)
@@ -187,7 +189,13 @@ def retrieval_probe(crusher, candidate, case, tokenizer):
                 equal = json.loads(text) == case.rows
             except ValueError:
                 pass
+        needed_match = isinstance(text, str) and any(
+            text == row.get(field) for row in case.rows for field in case.needed
+            if isinstance(row.get(field), str)
+        )
         fetched.append({"hash": key, "available": text is not None, "full_input": equal,
+                        "matches_needed_string_field": needed_match,
+                        "content_sha256": hashlib.sha256(text.encode()).hexdigest() if isinstance(text, str) else None,
                         "bytes": len(text.encode()) if isinstance(text, str) else 0,
                         "tokens": tokenizer.count_text(text) if isinstance(text, str) else 0})
     return fetched
@@ -201,6 +209,9 @@ def write_csv(path, rows):
 
 
 def summaries(observations):
+    def mean_or_none(values):
+        values = list(values)
+        return statistics.fmean(values) if values else None
     result = []
     for corpus, method in sorted({(r["corpus"], r["method"]) for r in observations}):
         rr = [r for r in observations if r["corpus"] == corpus and r["method"] == method]
@@ -211,8 +222,8 @@ def summaries(observations):
                        "errors": sum(r["status"] not in ("evaluated", "not_evaluable") for r in rr),
                        "answer_correct": sum(r["answer_ok"] is True for r in evaluated),
                        "invariants_preserved": sum(r["invariant_ok"] is True for r in evaluated),
-                       "mean_byte_reduction_pct": statistics.fmean(r["byte_reduction_pct"] for r in rr if r["bytes"] is not None),
-                       "mean_token_reduction_pct": statistics.fmean(r["token_reduction_pct"] for r in rr if r["tokens"] is not None),
+                       "mean_byte_reduction_pct": mean_or_none(r["byte_reduction_pct"] for r in rr if r["bytes"] is not None),
+                       "mean_token_reduction_pct": mean_or_none(r["token_reduction_pct"] for r in rr if r["tokens"] is not None),
                        "median_ms": statistics.median(r["total_ms"] for r in rr),
                        "recoveries": sum(r["gate_decision"] == "recovered" for r in rr),
                        "original_fallbacks": sum(r["gate_decision"].startswith("fallback") for r in rr)})
@@ -250,7 +261,9 @@ def main():
                 "paper_base": PAPER_BASE, "source_pin": SOURCE_PIN,
                 "benchmark_sha": os.environ.get("GITHUB_SHA", "local-uncommitted"),
                 "run_id": os.environ.get("GITHUB_RUN_ID"), "python": sys.version,
-                "platform": platform.platform(), "encoding": "cl100k_base",
+                "platform": platform.platform(), "cpu_count": os.cpu_count(), "processor": platform.processor(),
+                "encoding": "cl100k_base", "adapter_revision": "ccr-csv-dialect-v2",
+                "exploratory_arm": "headroom_audit_values (added after initial adapter diagnostics)",
                 "tiktoken": md.version("tiktoken"), "repeats": args.repeats, "full": args.full,
                 "smart_crusher_sha256": sha(Path(module.__file__)),
                 "native_binary_sha256": sha(Path(native.__file__)),
@@ -270,11 +283,17 @@ def main():
                                   "raw": raw, "query": query, "patterns": case.patterns}) + "\n")
             def record(method, cand, samples, decision="", base_samples=None, cold_ms=0.0, extra=None):
                 status, ans_ok, inv_ok = check(case, cand)
+                detail = ""
+                if status == "not_evaluable":
+                    try:
+                        decode(cand.text, case.needed, cand.markers)
+                    except Unsupported as exc:
+                        detail = str(exc)
                 b = len(cand.text.encode()) if not cand.error else None
                 tok = tokenizer.count_text(cand.text) if not cand.error else None
                 totals = [s + base_samples[i] for i, s in enumerate(samples)] if base_samples else samples
                 row = {"case": case.name, "corpus": case.corpus, "task": case.task, "method": method,
-                       "input_sha256": inputs_hash, "status": status, "answer_ok": ans_ok,
+                       "input_sha256": inputs_hash, "status": status, "evaluation_detail": detail, "answer_ok": ans_ok,
                        "invariant_ok": inv_ok, "raw_bytes": raw_bytes, "bytes": b,
                        "byte_reduction_pct": 100 * (1 - b / raw_bytes) if b is not None else None,
                        "raw_tokens": raw_tokens, "tokens": tok,
@@ -289,7 +308,7 @@ def main():
             record("task_projection", projected, projection_times)
             (checked, dec), validation_times = timed(lambda: gate(case, projected), args.repeats)
             record("projection_plus_gate", checked, validation_times, dec, projection_times)
-            for mode in ["default", "lossless", "audit_safe"]:
+            for mode in ["default", "lossless", "audit_safe", "audit_values"]:
                 cand, samples, cold, crusher, config = run_native(case, mode, tokenizer, args.repeats)
                 retrieve = retrieval_probe(crusher, cand, case, tokenizer)
                 record("headroom_" + mode, cand, samples, cold_ms=cold,

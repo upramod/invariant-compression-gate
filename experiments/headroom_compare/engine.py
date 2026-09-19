@@ -18,6 +18,7 @@ from typing import Any, Callable
 Rows = list[dict[str, Any]]
 TABLE = re.compile(r"^\[(\d+)\]\{(.*)\}(?: __dropped:\d+)?$")
 CCR = re.compile(r"<<ccr:([a-f0-9]{12,24})(?:[ ,][^>]*)?>>")
+OPAQUE_CELL = re.compile(r"<<ccr:[a-f0-9]{12,24},[A-Za-z0-9_-]+,[0-9]+(?:\.[0-9]+)?(?:B|KB|MB)>>")
 
 
 class Unsupported(ValueError):
@@ -56,6 +57,43 @@ def scalar(cell: str, kind: str) -> Any:
     raise Unsupported(f"unsupported column type: {kind}")
 
 
+def csv_marker_cells(body: str) -> str:
+    """Normalize Headroom's unquoted opaque-marker cells for csv.reader.
+
+    The native formatter emits <<ccr:hash,kind,size>> without CSV quotes.
+    Recognize that exact atom only at a field boundary outside quotes. Do not
+    read the CCR store, consult the source, or change already-quoted strings.
+    """
+    if "<<ccr:" not in body:
+        return body
+    out = []
+    i, quoted, field_start = 0, False, True
+    while i < len(body):
+        char = body[i]
+        if quoted:
+            out.append(char)
+            if char == '"':
+                if i + 1 < len(body) and body[i + 1] == '"':
+                    out.append('"')
+                    i += 1
+                else:
+                    quoted = False
+            i += 1
+            continue
+        if field_start and char == '"':
+            quoted, field_start = True, False
+        elif field_start and body.startswith("<<ccr:", i):
+            match = OPAQUE_CELL.match(body, i)
+            if match and (match.end() == len(body) or body[match.end()] in ",\r\n"):
+                out.append('"' + match[0] + '"')
+                i, field_start = match.end(), False
+                continue
+        out.append(char)
+        field_start = char in ",\r\n"
+        i += 1
+    return "".join(out)
+
+
 def _table(text: str, needed: set[str]) -> Rows:
     header, sep, body = text.partition("\n")
     match = TABLE.fullmatch(header)
@@ -67,7 +105,7 @@ def _table(text: str, needed: set[str]) -> Rows:
     # Dotted flattened paths require a separate unflattening contract.
     if any("." in k for k, _ in columns if k in needed):
         raise Unsupported("flattened task field")
-    reader = csv.reader(io.StringIO(body), strict=True)
+    reader = csv.reader(io.StringIO(csv_marker_cells(body)), strict=True)
     rows = []
     for cells in reader:
         if len(cells) != len(columns):
@@ -233,3 +271,22 @@ def patterns_for(task: str, params: dict[str, Any], public: bool = False) -> lis
               "threshold": "metric_name", "provenance": "severity"}
     f = fields[task]
     return [pattern(f, params[f])]
+
+
+def value_patterns_for(task: str, params: dict[str, Any], public: bool = False) -> list[str]:
+    """Exploratory sensitivity: value-only patterns survive JSON-to-CSV rendering.
+
+    These can protect extra rows when a value appears in another field. They
+    are not guaranteed to retain every field of a matched row in a rendered
+    non-array representation; the external invariant check measures that.
+    """
+    if public:
+        if task in ("negative_evidence", "aggregation", "threshold"):
+            return [r"^"]
+        field = {"lookup": "issue_number", "rare_closed": "status", "provenance": "status",
+                 "latest_actor": "actor", "join_actor": "actor"}[task]
+    else:
+        field = {"lookup": "record_id", "rare_event": "state", "latest_state": "entity_id",
+                 "aggregation": "category", "join": "relation_key", "negative_evidence": "entity_id",
+                 "threshold": "metric_name", "provenance": "severity"}[task]
+    return [r"(?<![\w])" + re.escape(str(params[field])) + r"(?![\w])"]
